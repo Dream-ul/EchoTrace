@@ -1,0 +1,26 @@
+# Version control
+.git/
+.gitignore
+
+# Python and frontend build inputs
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+frontend/node_modules/
+
+# IDE and local data
+.idea/
+.vscode/
+logs/
+data/
+tmp/
+课件/
+.env
+.claude/
+
+# Tests and planning material are not needed in runtime images
+tests/
+docs/

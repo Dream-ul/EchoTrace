@@ -1,0 +1,27 @@
+{
+  "skill_name": "ingest-and-curate-sources",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "研究指定节点时，搜索结果给出一条媒体摘要和一份官方公告。抓取可访问原文，区分线索与证据，归纳主张并将精确片段绑定到来源。最终提交 NodeDraft，不要生成来源采集清单。",
+      "expected_output": "来源由应用工具获取并关联当前调查；最终交付包含归纳主张、evidence 片段与定位的 NodeDraft。",
+      "expectations": [
+        {"text": "搜索摘要不作为事实证据", "type": "contains"},
+        {"text": "最终载荷仍是 NodeDraft", "type": "contains"},
+        {"text": "不输出 collection_scope 或 captures 清单", "type": "not_contains"}
+      ],
+      "output_contract": "NodeDraft JSON in AgentDecision.answer"
+    },
+    {
+      "id": 2,
+      "prompt": "两份材料的规范 URL 和内容高度相同，其中一份是转载。研究节点中的相关主张，并说明转载与独立印证的区别。最终提交完整 NodeDraft。",
+      "expected_output": "重复材料不计作独立印证；若其传播关系有价值则在结论中说明，证据仍引用可定位原文。",
+      "expectations": [
+        {"text": "区分转载和独立来源", "type": "contains"},
+        {"text": "主张绑定可定位证据", "type": "contains"},
+        {"text": "不返回独立来源清单 JSON", "type": "not_contains"}
+      ],
+      "output_contract": "NodeDraft JSON in AgentDecision.answer"
+    }
+  ]
+}

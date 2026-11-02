@@ -1,0 +1,72 @@
+[
+  {
+    "case_id": "wuhan-university-library",
+    "investigation_type": "public_event",
+    "objective": "调查武汉大学图书馆争议事件的起因、事实演变、相关主体回应与当前结果",
+    "subject": "武汉大学图书馆争议事件",
+    "recommended_provider": "bocha",
+    "search_queries": [
+      "武汉大学图书馆事件 起因 事实 调查复核 官方通报",
+      "武汉大学 图书馆 事件 法院判决 学校回应 结果",
+      "武汉大学图书馆争议事件 时间线 多方回应"
+    ],
+    "preferred_domains": [
+      "whu.edu.cn",
+      "court.gov.cn",
+      "news.cn",
+      "xinhuanet.com",
+      "cctv.com"
+    ],
+    "node_coverage": {
+      "origin_early_signals": ["最早可定位材料", "时间地点", "当事主体", "早期不确定性"],
+      "event_scope": ["可交叉核实事实", "涉及主体", "事实边界", "不同来源的共同部分"],
+      "spread_amplification": ["首次公开传播", "传播节点", "媒体与平台", "传播样本与事实边界"],
+      "turning_point": ["司法或官方材料", "学校复核", "争议状态变化", "时间先后与因果边界"],
+      "response_treatment": ["学校行动", "司法行动", "其他机构行动", "行动结果与未决事项"],
+      "current_outcome": ["已完成事项", "当前状态", "现实影响", "剩余未知" ]
+    },
+    "acceptance": {
+      "min_documents": 3,
+      "required_sources": ["至少一个官方或司法来源", "至少一个独立媒体来源"],
+      "claim_rule": "主张必须是归纳表达，不能等于证据片段原文复制",
+      "evidence_rule": "每条主张至少关联一个带 URL、正文和定位信息的证据片段",
+      "review_axes": ["coverage", "evidence", "synthesis"],
+      "max_revisions": 3
+    }
+  },
+  {
+    "case_id": "huawei-bamboo-cicada",
+    "investigation_type": "public_opinion",
+    "objective": "调查华为竹知了事件的起因、平台处置、舆论变化与结果",
+    "subject": "华为竹知了事件",
+    "recommended_provider": "bocha",
+    "search_queries": [
+      "华为 竹知了 事件 起因 投诉 下架 官方说明",
+      "竹知了事件 171条 144条 华为 平台处置",
+      "华为竹知了事件 舆论影响 结果 多方观点"
+    ],
+    "preferred_domains": [
+      "huawei.com",
+      "weibo.com",
+      "douyin.com",
+      "news.cn",
+      "caixin.com"
+    ],
+    "node_coverage": {
+      "trigger_content": ["原始内容与发布主体", "内容性质", "发布时间", "事实与讽刺边界"],
+      "initial_spread": ["首发与扩散", "平台", "传播样本", "独立来源与转发边界"],
+      "core_positions": ["企业立场", "平台处置立场", "创作者与公众观点", "代表性样本"],
+      "narrative_shift": ["热度或叙事转向", "触发材料", "平台动作与舆论反应", "样本局限"],
+      "response_repair": ["华为说明与投诉", "平台执行", "创作者反馈", "已产生与未证实结果"],
+      "current_opinion_state": ["当前主题", "持续争议", "降温或扩散状态", "样本边界"]
+    },
+    "acceptance": {
+      "min_documents": 3,
+      "required_sources": ["企业或平台公开说明（如能检索）", "至少两个独立媒体或评论来源"],
+      "claim_rule": "区分可核实事实、观点和推测，不把评论文章的判断写成事实",
+      "evidence_rule": "主张必须引用原始网页片段，媒体转载需标注转载关系",
+      "review_axes": ["coverage", "evidence", "synthesis"],
+      "max_revisions": 3
+    }
+  }
+]

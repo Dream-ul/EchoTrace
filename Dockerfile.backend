@@ -1,0 +1,14 @@
+ARG BASE_REGISTRY=docker.io/library
+FROM ${BASE_REGISTRY}/python:3.11-slim-bookworm
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY app/ ./app/
+COPY echotrace/ ./echotrace/
+COPY migrations/ ./migrations/
+COPY alembic.ini .
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+ENV ECHOTRACE_HOST=0.0.0.0 ECHOTRACE_PORT=8000
+EXPOSE 8000
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

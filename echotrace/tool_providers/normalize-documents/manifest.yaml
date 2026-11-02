@@ -1,0 +1,23 @@
+kind: tool_provider
+name: normalize-documents
+description: Normalize bounded public-source records into stable EchoTrace document records.
+version: 1.0.0
+owners:
+  - researcher
+capabilities:
+  - normalize_documents
+exposure: deferred
+exposure_reason: Pipeline-stage transformation needed only after raw provider records have been captured.
+entrypoint: handler.py:run
+input:
+  records: array
+output:
+  documents: array
+  count: integer
+risk: read
+requires: []
+budget:
+  max_calls: 20
+  timeout_seconds: 5
+failure_mode: fail
+priority: 30

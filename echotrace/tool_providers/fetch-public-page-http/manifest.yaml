@@ -1,0 +1,23 @@
+kind: tool_provider
+name: fetch-public-page-http
+description: Fetch and normalize one public HTTP page with bounded size and provenance.
+version: 1.0.0
+owners:
+  - researcher
+capabilities:
+  - fetch_public_page
+exposure: core
+exposure_reason: Use for a known public URL when the deployment explicitly enables outbound page capture.
+entrypoint: handler.py:run
+input:
+  url: string
+output:
+  document: object
+risk: read
+requires:
+  - ECHOTRACE_PUBLIC_FETCH_ENABLED
+budget:
+  max_calls: 40
+  timeout_seconds: 30
+failure_mode: fallback
+priority: 10

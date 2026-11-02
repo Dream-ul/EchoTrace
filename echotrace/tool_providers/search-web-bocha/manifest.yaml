@@ -1,0 +1,27 @@
+kind: tool_provider
+name: search-web-bocha
+description: Bocha public-web search provider for Chinese and mixed-language source discovery.
+version: 1.0.0
+owners:
+  - researcher
+capabilities:
+  - search_web
+exposure: core
+exposure_reason: Use when Bocha is configured for regional or Chinese-language public-source discovery.
+entrypoint: handler.py:run
+input:
+  query: string
+  limit: integer?
+  domains: string[]?
+output:
+  documents: array
+  count: integer
+risk: read
+requires:
+  - BOCHA_WEB_SEARCH_API_KEY
+  - BOCHA_BASE_URL
+budget:
+  max_calls: 180
+  timeout_seconds: 30
+failure_mode: fallback
+priority: 1

@@ -1,0 +1,39 @@
+{
+  "skill_name": "format-conclusion-ir",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "将一段含有内部 claim ID、项目字段名和‘第一、第二’并列内容的节点结论，编辑成面向用户的 conclusion-ir.v1。允许润色并改成列表，不得增加事实或泄漏内部标识。",
+      "expected_output": "包含 heading、list 和 paragraph 的 IR；清除内部标识，保留事实含义并优化表达。",
+      "expectations": [
+        {"text": "schema_version 为 conclusion-ir.v1", "type": "contains"},
+        {"text": "输出为标题、段落或列表结构", "type": "contains"},
+        {"text": "不包含 nclaim_ 或 snake_case 项目字段", "type": "not_contains"},
+        {"text": "保留主体、时间、数量和因果等事实边界", "type": "contains"}
+      ],
+      "output_contract": "ConclusionFormatter JSON in AgentDecision.answer"
+    },
+    {
+      "id": 2,
+      "prompt": "原始结论中明确包含“主体｜行动｜结果”列名和两行对应内容。将其整理为清晰的 IR 表格，并润色读者可见表达。",
+      "expected_output": "输出列数一致的 table block；没有明确表格结构的叙述保持为 paragraph，不增加事实。",
+      "expectations": [
+        {"text": "使用 table block", "type": "contains"},
+        {"text": "表格行列数一致", "type": "contains"},
+        {"text": "不发明新事实", "type": "contains"}
+      ],
+      "output_contract": "ConclusionFormatter JSON in AgentDecision.answer"
+    },
+    {
+      "id": 3,
+      "prompt": "结论末段用‘第一、第二、第三’连续写出三项不同原因，每项后面都有解释；中间还混入‘详见 nclaim_abc123’和‘F discussion_trend,limitations’。请按语义完整改写和排版。",
+      "expected_output": "把三项原因各自完整整理为一个有序列表项；删除内部引用和无法面向读者解释的字段残片，不丢失编号后的解释，不补造事实。",
+      "expectations": [
+        {"text": "存在至少三个完整的有序列表项", "type": "contains"},
+        {"text": "不包含 nclaim_、discussion_trend 或 limitations", "type": "not_contains"},
+        {"text": "保留每项原有解释并保持事实边界", "type": "contains"}
+      ],
+      "output_contract": "ConclusionFormatter JSON in AgentDecision.answer"
+    }
+  ]
+}

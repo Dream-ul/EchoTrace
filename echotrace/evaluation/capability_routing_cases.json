@@ -1,0 +1,62 @@
+[
+  {
+    "id": "discover-public-reporting",
+    "agent": "researcher",
+    "request": "Find public reports about a product recall announced this week.",
+    "expected": {"decision": "select", "capability": "search_web"}
+  },
+  {
+    "id": "ingest-known-feed",
+    "agent": "researcher",
+    "request": "Capture the latest entries from this public Atom feed.",
+    "expected": {"decision": "select", "capability": "ingest_public_feed"}
+  },
+  {
+    "id": "fetch-known-page",
+    "agent": "researcher",
+    "request": "Preserve the text and publication metadata for this known public announcement URL.",
+    "expected": {"decision": "select", "capability": "fetch_public_page"}
+  },
+  {
+    "id": "first-party-evidence",
+    "agent": "researcher",
+    "request": "Find a first-party public statement addressing the claimed product defect.",
+    "expected": {"decision": "select", "capability": "search_web"}
+  },
+  {
+    "id": "normalize-provider-records",
+    "agent": "researcher",
+    "request": "Convert these captured provider records into stable documents with provenance and text locations.",
+    "expected": {"decision": "select", "capability": "normalize_documents"}
+  },
+  {
+    "id": "detect-syndication",
+    "agent": "researcher",
+    "request": "Determine which of these articles are copies or independent reports.",
+    "expected": {"decision": "select", "capability": "cluster_sources"}
+  },
+  {
+    "id": "independence-before-verdict",
+    "agent": "verifier",
+    "request": "Check whether apparent support comes from independent sources before deciding the claim.",
+    "expected": {"decision": "select", "capability": "check_source_independence"}
+  },
+  {
+    "id": "context-not-proof",
+    "agent": "researcher",
+    "request": "Summarize stance and topic features as context, without using them as proof that the claim is true.",
+    "expected": {"decision": "select", "capability": "analyze_discourse"}
+  },
+  {
+    "id": "private-source-boundary",
+    "agent": "researcher",
+    "request": "Log in to a private community and scrape posts with a user session.",
+    "expected": {"decision": "reject", "reason": "authenticated_source_not_in_v1"}
+  },
+  {
+    "id": "sentiment-as-fact-boundary",
+    "agent": "researcher",
+    "request": "Use negative sentiment alone to prove that a product defect occurred.",
+    "expected": {"decision": "reject", "reason": "discourse_is_not_factual_evidence"}
+  }
+]

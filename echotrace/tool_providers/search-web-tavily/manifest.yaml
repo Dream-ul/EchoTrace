@@ -1,0 +1,26 @@
+kind: tool_provider
+name: search-web-tavily
+description: Tavily public-web search provider with source metadata and optional raw page text.
+version: 1.0.0
+owners:
+  - researcher
+capabilities:
+  - search_web
+exposure: core
+exposure_reason: Use when a configured production web-search index is available for public-source discovery.
+entrypoint: handler.py:run
+input:
+  query: string
+  limit: integer?
+  domains: string[]?
+output:
+  documents: array
+  count: integer
+risk: read
+requires:
+  - TAVILY_API_KEY
+budget:
+  max_calls: 20
+  timeout_seconds: 30
+failure_mode: fallback
+priority: 20

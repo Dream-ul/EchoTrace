@@ -1,0 +1,24 @@
+kind: tool_provider
+name: ingest-rss
+description: Read a bounded public RSS or Atom feed and return normalized documents.
+version: 1.0.0
+owners:
+  - researcher
+capabilities:
+  - ingest_public_feed
+exposure: deferred
+exposure_reason: Source-specific ingestion used only when a public RSS or Atom feed is selected.
+entrypoint: handler.py:run
+input:
+  feed_url: string
+  limit: integer?
+output:
+  documents: array
+  count: integer
+risk: read
+requires: []
+budget:
+  max_calls: 1
+  timeout_seconds: 10
+failure_mode: fallback
+priority: 20

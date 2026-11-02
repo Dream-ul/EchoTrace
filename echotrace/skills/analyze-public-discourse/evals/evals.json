@@ -1,0 +1,37 @@
+{
+  "skill_name": "analyze-public-discourse",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "当前节点收到一组已收集帖子，包含原创、回复和一条转载。归纳讨论主题、样本边界和待核实线索；若来源有可比较的互动统计，按原口径形成节点数据集。最终提交 NodeDraft，不要输出独立舆情 JSON。",
+      "expected_output": "情感与立场作为样本信号；转载扩散与独立源头分开；结论和数据写入当前节点草稿。",
+      "expectations": [
+        {"text": "交付 NodeDraft 而非独立舆情对象", "type": "contains"},
+        {"text": "说明样本范围和分析限制", "type": "contains"},
+        {"text": "不把情绪或热度当成事实证明", "type": "contains"}
+      ],
+      "output_contract": "NodeDraft JSON in AgentDecision.answer"
+    },
+    {
+      "id": 2,
+      "prompt": "新闻来源中有强烈指控，但当前没有任何评论或帖子采样。按节点目标继续研究事实；不要模拟舆情样本，并在结论中说明没有讨论样本可供分析。",
+      "expected_output": "事实主张仍由原始来源证据支撑；没有讨论记录时不生成情感/立场分布或评论数据集。",
+      "expectations": [
+        {"text": "不伪造公开讨论样本", "type": "contains"},
+        {"text": "不把媒体网页冒充评论数据", "type": "contains"},
+        {"text": "输出完整 NodeDraft", "type": "contains"}
+      ],
+      "output_contract": "NodeDraft JSON in AgentDecision.answer"
+    },
+    {
+      "id": 3,
+      "prompt": "用户只给出一个公开 URL 并询问页面内容。不要启动多平台舆情分析；按正常单网页读取路径处理。",
+      "expected_output": "使用 fetch_public_page 读取已知页面，或用中文请求缺失的 URL；不构造评论数据或用户可见内部路由标记。",
+      "expectations": [
+        {"text": "单 URL 不触发舆情分析", "type": "contains"},
+        {"text": "不输出内部路由标记", "type": "not_contains"}
+      ],
+      "files": []
+    }
+  ]
+}

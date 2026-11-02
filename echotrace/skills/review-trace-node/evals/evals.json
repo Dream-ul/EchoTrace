@@ -1,0 +1,38 @@
+{
+  "skill_name": "review-trace-node",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "审阅第 1 轮节点草稿，重点判断模板方面、主体和视角是否覆盖。若有缺口，给出具体检索词、优先来源类型和新增/拆分主张建议。",
+      "expected_output": "status 为 revise 的 NodeReview，反馈集中在覆盖面，包含可执行的补充研究意见。",
+      "expectations": [
+        {"text": "返回 NodeReview 业务载荷", "type": "contains"},
+        {"text": "status 为 revise", "type": "contains"},
+        {"text": "包含具体搜索或主张编辑建议", "type": "contains"}
+      ],
+      "output_contract": "NodeReview JSON in AgentDecision.answer"
+    },
+    {
+      "id": 2,
+      "prompt": "审阅第 2 轮修订稿，重点检查原始片段、独立印证、定位和范围边界，给出下一轮可执行的补证建议。",
+      "expected_output": "status 为 revise 的 NodeReview，反馈集中在证据深度，不重复第 1 轮覆盖面清单。",
+      "expectations": [
+        {"text": "status 为 revise", "type": "contains"},
+        {"text": "检查原始证据与来源独立性", "type": "contains"},
+        {"text": "反馈可执行", "type": "contains"}
+      ],
+      "output_contract": "NodeReview JSON in AgentDecision.answer"
+    },
+    {
+      "id": 3,
+      "prompt": "完成第 3 轮最终编辑审阅，重点调整主张顺序、重复、主体行动结果表达和结论结构。材料边界写入最终编辑意见，不再创建新的补搜任务。",
+      "expected_output": "status 为 finalize 的 NodeReview，三个待办数组为空，结论编辑意见清楚且节点可冻结。",
+      "expectations": [
+        {"text": "status 为 finalize", "type": "contains"},
+        {"text": "最终轮没有开放补搜任务", "type": "contains"},
+        {"text": "不输出 PASS/GAP/CONFLICT", "type": "not_contains"}
+      ],
+      "output_contract": "NodeReview JSON in AgentDecision.answer"
+    }
+  ]
+}

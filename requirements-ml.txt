@@ -1,0 +1,11 @@
+# Optional real Chinese/multilingual sentiment backend.
+# Install only in workers that have a model cache or a model artifact volume.
+torch>=2.2
+transformers>=4.45
+safetensors>=0.4
+
+# Default checkpoint (Chinese Weibo sentiment, 3 classes):
+# senlou/weibo-sentiment-chinese-bert
+#
+# Override ECHOTRACE_SENTIMENT_MODEL only with a checkpoint validated for the
+# deployment's Chinese corpus.

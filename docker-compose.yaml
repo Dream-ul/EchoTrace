@@ -1,0 +1,158 @@
+services:
+  mysql:
+    profiles: ["production"]
+    image: ${DOCKER_BASE_REGISTRY:-docker.io/library}/mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-echotrace}
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes: ["mysql_data:/var/lib/mysql"]
+    # Keep the container port at 3306; avoid colliding with a local MySQL by
+    # exposing the bundled service on 3307 unless explicitly overridden.
+    ports: ["127.0.0.1:${MYSQL_PORT:-3307}:3306"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  redis:
+    profiles: ["production"]
+    image: ${DOCKER_BASE_REGISTRY:-docker.io/library}/redis:7-alpine
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+    command: ["redis-server", "--requirepass", "${ECHOTRACE_REDIS_PASSWORD:?Set ECHOTRACE_REDIS_PASSWORD in .env}"]
+    volumes: ["redis_data:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${ECHOTRACE_REDIS_PASSWORD:?Set ECHOTRACE_REDIS_PASSWORD in .env}", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  rustfs:
+    image: ghcr.io/rustfs/rustfs:1.0.1
+    restart: unless-stopped
+    environment:
+      RUSTFS_VOLUMES: /data
+      RUSTFS_ADDRESS: 0.0.0.0:9000
+      RUSTFS_CONSOLE_ADDRESS: 0.0.0.0:9001
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_ACCESS_KEY: ${S3_ACCESS_KEY_ID:?Set S3_ACCESS_KEY_ID in .env}
+      RUSTFS_SECRET_KEY: ${S3_SECRET_ACCESS_KEY:?Set S3_SECRET_ACCESS_KEY in .env}
+    volumes: ["rustfs_data:/data"]
+    ports:
+      - "127.0.0.1:${RUSTFS_API_PORT:-9000}:9000"
+      - "127.0.0.1:${RUSTFS_CONSOLE_PORT:-9001}:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  backend:
+    profiles: ["production"]
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+      args:
+        BASE_REGISTRY: ${DOCKER_BASE_REGISTRY:-docker.io/library}
+    restart: unless-stopped
+    depends_on:
+      mysql: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      rustfs: {condition: service_healthy}
+    volumes:
+      # The workbench settings API writes the same ignored host .env used by Compose.
+      - ./.env:/app/.env
+    environment:
+      ECHOTRACE_PERSISTENCE: mysql
+      ECHOTRACE_DATABASE_URL: mysql+pymysql://${MYSQL_USER:-root}:${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}@mysql:3306/${MYSQL_DATABASE:-echotrace}
+      ECHOTRACE_REDIS_URL: redis://:${ECHOTRACE_REDIS_PASSWORD:?Set ECHOTRACE_REDIS_PASSWORD in .env}@redis:6379/${ECHOTRACE_REDIS_DB:-0}
+      S3_ENDPOINT_URL: http://rustfs:9000
+      S3_BUCKET: ${S3_BUCKET:-echotrace-sources}
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?Set S3_ACCESS_KEY_ID in .env}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?Set S3_SECRET_ACCESS_KEY in .env}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_USE_TLS: ${S3_USE_TLS:-0}
+      S3_MAX_OBJECT_BYTES: ${S3_MAX_OBJECT_BYTES:-52428800}
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
+      TAVILY_BASE_URL: ${TAVILY_BASE_URL:-https://api.tavily.com/search}
+      BOCHA_WEB_SEARCH_API_KEY: ${BOCHA_WEB_SEARCH_API_KEY:-}
+      BOCHA_BASE_URL: ${BOCHA_BASE_URL:-https://api.bocha.cn/v1/web-search}
+      ECHOTRACE_PUBLIC_FETCH_ENABLED: ${ECHOTRACE_PUBLIC_FETCH_ENABLED:-0}
+      ECHOTRACE_LLM_BASE_URL: ${ECHOTRACE_LLM_BASE_URL:-}
+      ECHOTRACE_LLM_API_KEY: ${ECHOTRACE_LLM_API_KEY:-}
+      ECHOTRACE_LLM_MODEL: ${ECHOTRACE_LLM_MODEL:-}
+      ECHOTRACE_LLM_TIMEOUT_SECONDS: ${ECHOTRACE_LLM_TIMEOUT_SECONDS:-900}
+      ECHOTRACE_LLM_MAX_TOKENS: ${ECHOTRACE_LLM_MAX_TOKENS:-16384}
+      ECHOTRACE_LLM_CONTEXT_WINDOW: ${ECHOTRACE_LLM_CONTEXT_WINDOW:-131072}
+      ECHOTRACE_CONTEXT_TARGET_RATIO: ${ECHOTRACE_CONTEXT_TARGET_RATIO:-0.8}
+      ECHOTRACE_AGENT_MAX_STEPS: ${ECHOTRACE_AGENT_MAX_STEPS:-24}
+      ECHOTRACE_HOST: 0.0.0.0
+      ECHOTRACE_PORT: 8000
+      ECHOTRACE_PROCESS: api
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/readyz')"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+  worker:
+    profiles: ["production"]
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+      args:
+        BASE_REGISTRY: ${DOCKER_BASE_REGISTRY:-docker.io/library}
+    restart: unless-stopped
+    depends_on:
+      mysql: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      rustfs: {condition: service_healthy}
+    volumes:
+      - ./.env:/app/.env
+    environment:
+      ECHOTRACE_PERSISTENCE: mysql
+      ECHOTRACE_DATABASE_URL: mysql+pymysql://${MYSQL_USER:-root}:${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}@mysql:3306/${MYSQL_DATABASE:-echotrace}
+      ECHOTRACE_REDIS_URL: redis://:${ECHOTRACE_REDIS_PASSWORD:?Set ECHOTRACE_REDIS_PASSWORD in .env}@redis:6379/${ECHOTRACE_REDIS_DB:-0}
+      S3_ENDPOINT_URL: http://rustfs:9000
+      S3_BUCKET: echotrace-sources
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?Set S3_ACCESS_KEY_ID in .env}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?Set S3_SECRET_ACCESS_KEY in .env}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_USE_TLS: ${S3_USE_TLS:-0}
+      S3_MAX_OBJECT_BYTES: ${S3_MAX_OBJECT_BYTES:-52428800}
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
+      TAVILY_BASE_URL: ${TAVILY_BASE_URL:-https://api.tavily.com/search}
+      BOCHA_WEB_SEARCH_API_KEY: ${BOCHA_WEB_SEARCH_API_KEY:-}
+      BOCHA_BASE_URL: https://api.bocha.cn/v1/web-search
+      ECHOTRACE_PUBLIC_FETCH_ENABLED: ${ECHOTRACE_PUBLIC_FETCH_ENABLED:-0}
+      ECHOTRACE_LLM_BASE_URL: ${ECHOTRACE_LLM_BASE_URL:-}
+      ECHOTRACE_LLM_API_KEY: ${ECHOTRACE_LLM_API_KEY:-}
+      ECHOTRACE_LLM_MODEL: ${ECHOTRACE_LLM_MODEL:-}
+      ECHOTRACE_LLM_TIMEOUT_SECONDS: "900"
+      ECHOTRACE_LLM_MAX_TOKENS: "16384"
+      ECHOTRACE_LLM_CONTEXT_WINDOW: "131072"
+      ECHOTRACE_CONTEXT_TARGET_RATIO: "0.8"
+      ECHOTRACE_AGENT_MAX_STEPS: "24"
+      ECHOTRACE_WORKER_ID: orchestrator-1
+      ECHOTRACE_PROCESS: worker
+      ECHOTRACE_SKIP_MIGRATIONS: "1"
+  frontend:
+    profiles: ["production"]
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        BASE_REGISTRY: ${DOCKER_BASE_REGISTRY:-docker.io/library}
+    restart: unless-stopped
+    depends_on:
+      backend: {condition: service_healthy}
+    ports: ["${FRONTEND_PORT:-8080}:80"]
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--quiet", "http://127.0.0.1/readyz"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+volumes:
+  mysql_data:
+  redis_data:
+  rustfs_data:

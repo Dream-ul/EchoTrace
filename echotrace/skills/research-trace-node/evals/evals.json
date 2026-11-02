@@ -1,0 +1,27 @@
+{
+  "skill_name": "research-trace-node",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "根据分配的节点目标，利用两份可定位原始材料完成 NodeDraft。主张要由研究 Agent 归纳，证据保留准确片段和来源定位，结论综合所有主张。使用中文。",
+      "expected_output": "符合节点合同的 NodeDraft JSON；至少一条归纳主张、一条来源定位证据、中文综合结论和媒体数组。",
+      "expectations": [
+        {"text": "包含 claims、evidence、conclusion 和 media", "type": "contains"},
+        {"text": "主张引用证据 ID", "type": "contains"},
+        {"text": "不返回来源清单或全局门禁", "type": "not_contains"}
+      ],
+      "output_contract": "NodeDraft JSON in AgentDecision.answer"
+    },
+    {
+      "id": 2,
+      "prompt": "根据上一轮 NodeReview 补搜指定事实并修订节点；保持 slot_id，不足以支持的新措辞必须重新查证。使用中文。",
+      "expected_output": "修订后的完整 NodeDraft，保留节点身份和证据定位，并把审稿意见落实到主张或结论。",
+      "expectations": [
+        {"text": "保留 slot_id 并递增 revision", "type": "contains"},
+        {"text": "仍返回完整 NodeDraft", "type": "contains"},
+        {"text": "不把审稿意见当成证据", "type": "contains"}
+      ],
+      "output_contract": "NodeDraft JSON in AgentDecision.answer"
+    }
+  ]
+}

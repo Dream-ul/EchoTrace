@@ -1,0 +1,27 @@
+{
+  "skill_name": "synthesize-investigation-report",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "根据冻结节点、指定调查类型模板和章节规划，撰写当前章节。保持模板子标题顺序，综合前后章职责，并引用输入中真实存在的 claim、evidence 和数据集。",
+      "expected_output": "符合 Report Composer 当前 phase 的中文 JSON，章节叙事连贯，引用只使用输入中已有 ID。",
+      "expectations": [
+        {"text": "遵循模板子标题顺序", "type": "contains"},
+        {"text": "不发明事实、来源或指标", "type": "contains"},
+        {"text": "不把内部字段写进读者文字", "type": "contains"}
+      ],
+      "output_contract": "Report Composer JSON in AgentDecision.answer"
+    },
+    {
+      "id": 2,
+      "prompt": "模板推荐绘制趋势图，但输入数据只有一个时间点。完成章节并根据数据限制选择适当表现形式。",
+      "expected_output": "保留有价值的中文事实分析，不伪造趋势或额外时间点；严格遵循模板允许的 block。",
+      "expectations": [
+        {"text": "不伪造趋势图数据", "type": "contains"},
+        {"text": "使用有信息量的中文说明", "type": "contains"},
+        {"text": "不解释内部绘图实现", "type": "contains"}
+      ],
+      "output_contract": "Report Composer JSON in AgentDecision.answer"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "feed_url": {"type": "string", "format": "uri", "description": "Public RSS or Atom URL."},
+    "limit": {"type": "integer", "minimum": 1, "maximum": 100}
+  },
+  "required": ["feed_url"],
+  "additionalProperties": false
+}

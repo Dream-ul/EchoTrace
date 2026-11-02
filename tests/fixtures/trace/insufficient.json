@@ -1,0 +1,17 @@
+{
+  "trace_id": "trace_insufficient_public_event",
+  "trace_version": "trace.v1",
+  "run_id": "run_fixture_insufficient",
+  "investigation_type": "public_event",
+  "subject": "待核验的短视频传闻",
+  "coverage": {"observed_start": null, "observed_end": "2026-09-12T10:00:00+08:00", "precision": "unknown"},
+  "overview": {"lifecycle_summary": "目前只有一条无法定位原始出处的描述。", "current_state": "材料不足", "turning_point_ids": [], "confidence_boundary": "无法确认发生时间、地点和结果。"},
+  "phases": [{"phase_id": "phase_gap", "type": "gap", "title": "余波与待核问题", "order": 0, "status": "gap", "node_ids": ["node_gap"]}],
+  "nodes": [
+    {"node_id": "node_gap", "phase_id": "phase_gap", "node_type": "gap", "title": "缺少可定位原始材料", "summary": "当前材料没有原始链接、发布时间或可复核的上下文。", "time_precision": "unknown", "time_basis": "unknown", "status": "gap", "factuality": "hypothesis", "turning_point": false, "importance": 1, "actors": [], "locations": [], "entities": [], "metrics": [], "media": [], "citations": [], "support": null, "uncertainty": {"all": "unknown"}, "gaps": ["原始视频链接", "事件时间", "事件地点"]}
+  ],
+  "edges": [],
+  "datasets": [],
+  "source_anchors": [],
+  "quality": {"node_count": 1, "citation_coverage": 0.0, "conflict_count": 0, "unresolved_gap_count": 3}
+}

@@ -1,0 +1,21 @@
+{
+  "trace_id": "trace_conflict_public_event",
+  "trace_version": "trace.v1",
+  "run_id": "run_fixture_conflict",
+  "investigation_type": "public_event",
+  "subject": "某地桥梁封闭传闻",
+  "coverage": {"observed_start": "2026-09-10T08:00:00+08:00", "observed_end": "2026-09-10T20:00:00+08:00", "precision": "day"},
+  "overview": {"lifecycle_summary": "来源对封闭原因存在冲突，当前只能确认道路短时管制。", "current_state": "原因未确定", "turning_point_ids": [], "confidence_boundary": "不能把单一社交平台说法写成桥梁结构受损。"},
+  "phases": [{"phase_id": "phase_conflict", "type": "formation", "title": "信息形成", "order": 0, "status": "contested", "node_ids": ["node_claim_a", "node_claim_b"]}],
+  "nodes": [
+    {"node_id": "node_claim_a", "phase_id": "phase_conflict", "node_type": "claim", "title": "社交帖子称桥梁结构受损", "summary": "一条社交帖子将道路管制归因于桥梁结构受损。", "event_time_start": "2026-09-10T08:00:00+08:00", "time_precision": "day", "time_basis": "explicit_source", "status": "contested", "factuality": "reported_claim", "turning_point": false, "importance": 3, "actors": [], "locations": ["某地桥梁"], "entities": ["桥梁"], "metrics": [], "media": [], "citations": ["anchor_social"], "support": {"level": "contested", "directness": "reported", "independent_source_count": 1, "supporting_evidence_count": 1, "contradicting_evidence_count": 1, "source_cluster_count": 2, "freshness": "current", "explanation": "社交帖子提出该说法，但官方说明未支持结构受损。"}, "uncertainty": {"cause": "来源冲突"}, "gaps": []},
+    {"node_id": "node_claim_b", "phase_id": "phase_conflict", "node_type": "confirmed_fact", "title": "官方仅确认临时交通管制", "summary": "官方通告确认临时交通管制，但未确认桥梁结构受损。", "event_time_start": "2026-09-10T10:00:00+08:00", "time_precision": "exact", "time_basis": "explicit_source", "status": "confirmed", "factuality": "fact", "turning_point": true, "importance": 5, "actors": ["主管部门"], "locations": ["某地桥梁"], "entities": ["交通管制"], "metrics": [], "media": [], "citations": ["anchor_official"], "support": {"level": "strong", "directness": "direct", "independent_source_count": 1, "supporting_evidence_count": 1, "contradicting_evidence_count": 0, "source_cluster_count": 1, "freshness": "current", "explanation": "官方通告直接限定了已确认事实范围。"}, "uncertainty": {"cause": "未说明管制原因"}, "gaps": ["管制原因"]}
+  ],
+  "edges": [{"edge_id": "edge_conflict", "from_node_id": "node_claim_a", "to_node_id": "node_claim_b", "relation": "contradicts", "label": "原因表述冲突", "status": "contested", "support": null, "citations": ["anchor_social", "anchor_official"]}],
+  "datasets": [],
+  "source_anchors": [
+    {"anchor_id": "anchor_social", "document_id": "doc_social_1", "canonical_url": "https://example.test/social-claim", "selector": {"quote": "桥梁结构受损"}, "published_at": "2026-09-10T08:00:00+08:00", "retrieved_at": "2026-09-10T12:00:00+08:00", "content_hash": "hash-social"},
+    {"anchor_id": "anchor_official", "document_id": "doc_official_3", "canonical_url": "https://example.test/traffic-notice", "selector": {"quote": "临时交通管制"}, "published_at": "2026-09-10T10:00:00+08:00", "retrieved_at": "2026-09-10T12:00:00+08:00", "content_hash": "hash-official-3"}
+  ],
+  "quality": {"node_count": 2, "citation_coverage": 1.0, "conflict_count": 1, "unresolved_gap_count": 1}
+}
