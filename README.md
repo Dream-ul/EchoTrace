@@ -38,6 +38,40 @@ flowchart LR
     Models --> Search[网页搜索服务]
 ```
 
+## 多 Agent 分工与调查流程
+
+EchoTrace 由编排 Agent 按需调用不同职责的 Agent，不是让所有 Agent 自由协商。每个角色接收范围明确的任务和结构化上下文，通过校验后的数据合同交接结果；MySQL 中的任务记录和 Redis Streams 负责持久化调度及重试。
+
+| Agent | 职责 | 主要产物 |
+| --- | --- | --- |
+| 编排 Agent（Orchestrator） | 用户选择自动分类时，根据目标和已采集来源在已注册的调查类别中分类；选择固定调查模板，并为模板节点规划问题、能力和依赖。 | 类别与理由、节点任务计划 |
+| 研究 Agent（Researcher） | 按分配的节点问题检索和整理来源，形成有来源证据支撑的主张、结论及可用数据集；根据核验反馈进行定向修订。 | 节点研究稿、主张与证据、数据集 |
+| 核验 Agent（Verifier） | 对照节点目标、来源证据和本轮审查重点，检查研究稿并指出缺口；返回修订意见或最终通过状态。 | 结构化核验意见 |
+| 结论格式化 Agent（Conclusion Formatter） | 不增加事实，对已核验的节点结论做面向读者的语义编辑，整理标题、段落、列表或表格。 | 节点展示用 Conclusion IR |
+| 报告编写 Agent（Report Composer） | 只使用冻结后的调查脉络和对应报告模板，先规划全篇与章节重点，再按章节组织文字、列表、表格和有数据依据的图表。 | 结构化报告及章节内容 |
+
+一次调查先采集初始来源；如类别为“自动”，由编排 Agent 从系统已有类别中判断并选择对应模板。随后编排 Agent 按模板规划固定节点，调度器依据节点依赖并行执行可独立开展的任务。研究 Agent 完成一个节点后，结论格式化 Agent 生成展示 IR，Verifier 对研究内容进行审查；前两轮审查返回定向修订意见，第三轮返回 `finalize`，研究 Agent 随后完成对应的最终修订版本并冻结节点。全部节点冻结后，Report Composer 规划报告并生成各章节，最后由应用按报告合同校验、组装并渲染。
+
+```mermaid
+flowchart TD
+    Start[创建调查] --> Collect[采集初始公开来源]
+    Collect --> Classify{类别是否为自动？}
+    Classify -->|是| Classifier[编排 Agent：判断类别]
+    Classify -->|否| Template[使用用户选择的类别]
+    Classifier --> Plan[编排 Agent：选择固定模板并规划节点任务]
+    Template --> Plan
+    Plan --> Schedule[MySQL Outbox 与 Redis Streams 调度]
+    Schedule --> Parallel[按节点依赖并行执行可就绪任务]
+    Parallel --> Research[研究 Agent：按节点检索、形成主张与证据]
+    Research --> Format[结论格式化 Agent：生成节点展示 IR]
+    Format --> Verify[核验 Agent：核对目标、来源和证据]
+    Verify -->|需要修订，最多三轮| Research
+    Verify -->|最终核验通过| Freeze[冻结节点与调查脉络]
+    Freeze --> ReportPlan[报告编写 Agent：规划全篇与章节]
+    ReportPlan --> Sections[报告编写 Agent：生成章节内容]
+    Sections --> Render[校验、组装并渲染报告]
+```
+
 ## 功能
 
 - 创建、暂停、恢复和取消调查，并查看任务进度。
@@ -141,7 +175,6 @@ EchoTrace/
 ├── migrations/versions/         # Alembic 数据库迁移
 ├── tests/                       # 后端、Agent 与工具提供器测试
 ├── assets/screenshots/          # README 界面截图
-├── .github/workflows/ci.yml     # 后端与前端持续集成
 ├── .env.example                 # 本地环境配置模板
 ├── Dockerfile.backend
 ├── Dockerfile.frontend

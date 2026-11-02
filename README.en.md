@@ -38,6 +38,40 @@ flowchart LR
     Models --> Search[Web search providers]
 ```
 
+## Multi-Agent Roles and Workflow
+
+EchoTrace routes work to agents with distinct responsibilities; agents do not negotiate freely with each other. Each role receives a bounded task and structured context, then hands off validated data through explicit contracts. MySQL task records and Redis Streams provide durable scheduling and retries.
+
+| Agent | Responsibility | Main output |
+| --- | --- | --- |
+| Orchestrator | When the user selects automatic classification, choose among registered investigation types using the objective and collected sources. Select the fixed investigation template and plan node questions, capabilities, and dependencies. | Investigation type and rationale; node task plan |
+| Researcher | Research one assigned node, gather and organize sources, and produce source-backed claims, conclusions, and available datasets. Revise the node in response to verifier feedback. | Node draft, claims, evidence, datasets |
+| Verifier | Check each draft against its node objective, source evidence, and round-specific review criteria. Return focused revision feedback or final approval. | Structured review |
+| Conclusion Formatter | Edit an already researched node conclusion for readers without adding facts; organize it into suitable headings, paragraphs, lists, or tables. | Reader-facing node Conclusion IR |
+| Report Composer | Use only the frozen investigation trace and its report template. Plan the report and chapter focus, then compose prose, lists, tables, and charts backed by available data. | Structured report and chapter content |
+
+An investigation first collects initial sources. If its type is `auto`, the Orchestrator classifies it using the registered types and selects the corresponding template. The Orchestrator then plans tasks for the template's fixed nodes; the scheduler runs dependency-ready tasks in parallel. For each node, the Researcher produces a draft, the Conclusion Formatter prepares its display IR, and the Verifier reviews the research. The first two review rounds return focused revision requests; the third returns `finalize`, after which the Researcher completes the corresponding final revision and the node is frozen. Once every node is frozen, the Report Composer plans the report, generates its chapters, and the application validates, assembles, and renders the final document.
+
+```mermaid
+flowchart TD
+    Start[Create investigation] --> Collect[Collect initial public sources]
+    Collect --> Classify{Type is automatic?}
+    Classify -->|Yes| Classifier[Orchestrator: classify the investigation]
+    Classify -->|No| Template[Use the user-selected type]
+    Classifier --> Plan[Orchestrator: select fixed template and plan node tasks]
+    Template --> Plan
+    Plan --> Schedule[MySQL outbox and Redis Streams scheduling]
+    Schedule --> Parallel[Run dependency-ready node tasks in parallel]
+    Parallel --> Research[Researcher: investigate node, claims, and evidence]
+    Research --> Format[Conclusion Formatter: create node display IR]
+    Format --> Verify[Verifier: check objective, sources, and evidence]
+    Verify -->|Revise, up to three rounds| Research
+    Verify -->|Final review passes| Freeze[Freeze nodes and investigation trace]
+    Freeze --> ReportPlan[Report Composer: plan report and chapters]
+    ReportPlan --> Sections[Report Composer: generate chapter content]
+    Sections --> Render[Validate, assemble, and render report]
+```
+
 ## Features
 
 - Create, pause, resume, and cancel investigations while monitoring task progress.
@@ -141,7 +175,6 @@ EchoTrace/
 ├── migrations/versions/         # Alembic database migrations
 ├── tests/                       # Backend, agent, and tool-provider tests
 ├── assets/screenshots/          # README screenshots
-├── .github/workflows/ci.yml     # Backend and frontend continuous integration
 ├── .env.example                 # Local environment template
 ├── Dockerfile.backend
 ├── Dockerfile.frontend
